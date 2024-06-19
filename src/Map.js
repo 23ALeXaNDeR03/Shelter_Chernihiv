@@ -24,7 +24,7 @@ const Map = () => {
                 const nearestShelter = shelters[0]; // Placeholder для найближчого укриття
                 const response = await axios.get(`https://api.openrouteservice.org/v2/directions/driving-car`, {
                     params: {
-                        api_key: '5b3ce3597851110001cf6248329247b73ad04446ba774aa682b7f307', // Ваш API ключ
+                        api_key: '', // Ваш API ключ
                         start: `${userLocation.lng},${userLocation.lat}`, // Початкова точка (місцезнаходження користувача)
                         end: `${nearestShelter.longitude},${nearestShelter.latitude}` // Кінцева точка (місцезнаходження укриття)
                     }
