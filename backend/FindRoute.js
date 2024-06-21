@@ -31,7 +31,7 @@ const getNearestShelters = (userLocation, shelters) => {
 // Функція для отримання маршруту
 const getRoute = async (start, end, profile) => {
     try {
-        const apiKey = 'b3ce3597851110001cf6248329247b73ad04446ba774aa682b7f307';//Api
+        const apiKey = '';//Api
         const response = await axios.get(`https://api.openrouteservice.org/v2/directions/${profile}`, {
             params: {
                 api_key: apiKey,
