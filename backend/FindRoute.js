@@ -13,7 +13,7 @@ const haversineDistance = (coords1, coords2) => {
               Math.sin(dLon / 2) ** 2;
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    console.log(R*c);
+    const distance = R * c;
     return R * c;
 };
 
@@ -32,7 +32,7 @@ const getNearestShelters = (userLocation, shelters) => {
 const getRoute = async (start, end, profile) => {
     try {
         const apiKey = '';//Api
-        const response = await axios.get(`https://api.openrouteservice.org/v2/directions/${profile}`, {
+        const response = await axios.get(`https://api.openrouteservice.org/v2/directions/driving-car`, {
             params: {
                 api_key: apiKey,
                 start: `${start.lng},${start.lat}`,
@@ -40,9 +40,9 @@ const getRoute = async (start, end, profile) => {
             }
         });
 
-        const routeData = response.data.routes[0];
+        const routeData = response.data.features[0];
         const route = routeData.geometry.coordinates.map(coord => [coord[1], coord[0]]);
-        const distance = routeData.summary.distance;
+        const distance = routeData.properties.summary.distance;
         return { route, distance};
     } catch (error) {
         console.error('Error fetching route:', error);
