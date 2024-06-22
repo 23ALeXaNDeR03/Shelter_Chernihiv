@@ -1,65 +1,88 @@
-// Імпорт необхідних бібліотек
-import axios from 'axios';
-import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import React, { useEffect, useState } from 'react';
-import { MapContainer, Marker, Polyline, TileLayer, useMapEvents } from 'react-leaflet';
 
-const Map = () => {
-    // Використання useState для зберігання даних укриттів, поточного місцезнаходження користувача та маршруту
-    const [shelters, setShelters] = useState([]);
-    const [userLocation, setUserLocation] = useState(null);
-    const [route, setRoute] = useState(null);
+const MapComponent = ({ shelters, selectedShelterTypes, userLocation, setUserLocation }) => {
+    const [map, setMap] = useState(null);
+    const [userMarker, setUserMarker] = useState(null);
 
-    // Використання useEffect для завантаження даних про укриття з бекенду
     useEffect(() => {
-        axios.get('/api/shelters')
-            .then(response => setShelters(response.data)) // Зберігання даних укриттів у стані
-            .catch(error => console.error('Error fetching shelters:', error)); // Виведення помилки у разі невдачі
+        const initMap = () => {
+            const map = L.map('map').setView([51.4982, 31.2893], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: ''  // Убираем атрибуцию
+            }).addTo(map);
+
+            map.on('click', function (e) {
+                setUserLocation(e.latlng);
+            });
+
+            setMap(map);
+        };
+
+        initMap();
     }, []);
 
-    // Використання useEffect для обчислення маршруту до найближчого укриття при зміні місцезнаходження користувача або даних укриттів
     useEffect(() => {
-        if (userLocation && shelters.length > 0) {
-            const fetchRoute = async () => {
-                const nearestShelter = shelters[0]; // Placeholder для найближчого укриття
-                const response = await axios.get(`https://api.openrouteservice.org/v2/directions/driving-car`, {
-                    params: {
-                        api_key: '5b3ce3597851110001cf6248329247b73ad04446ba774aa682b7f307', // Ваш API ключ
-                        start: `${userLocation.lng},${userLocation.lat}`, // Початкова точка (місцезнаходження користувача)
-                        end: `${nearestShelter.longitude},${nearestShelter.latitude}` // Кінцева точка (місцезнаходження укриття)
-                    }
+        if (map) {
+            // Видаляємо всі мітки сховищ
+            map.eachLayer(layer => {
+                if (layer instanceof L.Marker && !layer.options.isUserLocation) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Додаємо мітки сховищ
+            shelters.filter(shelter => selectedShelterTypes.includes(shelter.type)).forEach(shelter => {
+                const icon = L.icon({
+                    iconUrl: `/images/${shelter.type}.png`,  // Путь к иконке
+                    iconSize: [24, 24],
                 });
-                const route = response.data.routes[0].geometry.coordinates.map(coord => [coord[1], coord[0]]); // Обробка координат маршруту
-                setRoute(route); // Збереження маршруту у стані
-            };
 
-            fetchRoute();
+                const marker = L.marker([shelter.latitude, shelter.longitude], { icon }).addTo(map);
+                marker.on('click', () => {
+                    highlightShelter(shelter);
+                });
+            });
+
+            // Обновляем или добавляем маркер местоположения пользователя
+            if (userLocation) {
+                const userIcon = L.icon({
+                    iconUrl: '/images/user-location.png',  // Путь к иконке для местоположения пользователя
+                    iconSize: [24, 24],
+                });
+
+                if (userMarker) {
+                    userMarker.setLatLng(userLocation);
+                } else {
+                    const newUserMarker = L.marker([userLocation.lat, userLocation.lng], {
+                        isUserLocation: true,
+                        icon: userIcon
+                    }).addTo(map);
+                    setUserMarker(newUserMarker);
+                }
+
+                map.setView([userLocation.lat, userLocation.lng], 15);
+            }
         }
-    }, [userLocation, shelters]);
+    }, [map, shelters, selectedShelterTypes, userLocation, userMarker]);
 
-    // Компонент для обробки кліків на карту та встановлення місцезнаходження користувача
-    const MapClickHandler = () => {
-        useMapEvents({
-            click: (e) => {
-                setUserLocation(e.latlng); // Встановлення координат місцезнаходження користувача
-            },
-        });
-        return null;
+    const highlightShelter = (shelter) => {
+        map.setView([shelter.latitude, shelter.longitude], 15);
+        const selectedShelter = document.getElementById(`shelter-${shelter.id}`);
+        const previouslySelected = document.querySelector('.selected');
+        if (previouslySelected) {
+            previouslySelected.classList.remove('selected');
+        }
+        if (selectedShelter) {
+            selectedShelter.classList.add('selected');
+        }
     };
 
     return (
-        <MapContainer center={[51.4982, 31.2893]} zoom={13} style={{ height: '100vh', width: '100%' }}>
-            <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" // Використання OpenStreetMap тайлів
-            />
-            {shelters.map(shelter => (
-                <Marker key={shelter.id} position={[shelter.latitude, shelter.longitude]} /> // Відображення маркерів укриттів
-            ))}
-            {userLocation && <Marker position={userLocation} />} // Відображення маркеру місцезнаходження користувача
-            {route && <Polyline positions={route} color="blue" />} // Відображення маршруту на карті
-            <MapClickHandler /> // Компонент для обробки кліків на карту
-        </MapContainer>
+        <div id="map" className="map-container"></div>
     );
 };
 
-export default Map;
+export default MapComponent;
