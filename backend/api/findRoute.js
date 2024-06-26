@@ -1,4 +1,5 @@
 const axios = require('axios');
+require('dotenv').config();
 
 
 // Функція для обчислення відстані за допомогою формули Haversine
@@ -17,7 +18,7 @@ const haversineDistance = (coords1, coords2) => {
     return R * c;
 };
 
-// Функція для отримання 3 найближчих укриттів
+// Функція для отримання 10 найближчих укриттів
 const getNearestShelters = (userLocation, shelters) => {
     return shelters
         .map(shelter => ({
@@ -31,7 +32,7 @@ const getNearestShelters = (userLocation, shelters) => {
 // Функція для отримання маршруту
 const getRoute = async (start, end, profile) => {
     try {
-        const apiKey = '5b3ce3597851110001cf6248d32b411e67834fcfb2ef1e7c726854c3';//Api
+        const apiKey = process.env.API_KEY;//Api
         const response = await axios.get(`https://api.openrouteservice.org/v2/directions/${profile}`, {
             params: {
                 api_key: apiKey,
@@ -50,8 +51,9 @@ const getRoute = async (start, end, profile) => {
     }
 };
 
-// Основна функція для пошуку найкоротшого маршруту до одного з 3 найближчих укриттів
+// Основна функція для пошуку найкоротшого маршруту до одного з 10 найближчих укриттів
 const findShortestRoute = async (userLocation, shelterType, profile, shelters) => {
+    //запрос к бд
     const sheltersOfType = [];
     shelters.forEach(shelters => {
         if (shelterType.includes(shelters.sheltertype)) {
