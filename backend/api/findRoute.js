@@ -6,23 +6,23 @@ const haversineDistance = (coords1, coords2) => {
     const toRad = angle => (Math.PI / 180) * angle;
     const R = 6371; // Радіус Землі в км
 
-    const dLat = toRad(coords2.lat - coords1.lat);
-    const dLon = toRad(coords2.lng - coords1.lng);
+    const dLat = toRad(coords2.latitude - coords1.latitude);
+    const dLon = toRad(coords2.longitude - coords1.longitude);
 
     const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(coords1.lat)) * Math.cos(toRad(coords2.lat)) *
+              Math.cos(toRad(coords1.latitude)) * Math.cos(toRad(coords2.latitude)) *
               Math.sin(dLon / 2) ** 2;
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
 };
 
-// Функція для отримання 10 найближчих укриттів
+// Функція для отримання 3 найближчих укриттів
 const getNearestShelters = (userLocation, shelters) => {
     return shelters
         .map(shelter => ({
             ...shelter,
-            distance: haversineDistance(userLocation, { lat: shelter.latitude, lng: shelter.longitude })
+            distance: haversineDistance(userLocation, { latitude: shelter.latitude, longitude: shelter.longitude })
         }))
         .sort((a, b) => a.distance - b.distance)
         .slice(0, 3);
@@ -50,9 +50,8 @@ const getRoute = async (start, end, profile) => {
     }
 };
 
-// Основна функція для пошуку найкоротшого маршруту до одного з 10 найближчих укриттів
+// Основна функція для пошуку найкоротшого маршруту до одного з 3 найближчих укриттів
 const findShortestRoute = async (userLocation, shelterType, profile, shelters) => {
-    //запрос к бд
     const sheltersOfType = [];
     shelters.forEach(shelters => {
         if (shelterType.includes(shelters.sheltertype)) {
@@ -61,6 +60,7 @@ const findShortestRoute = async (userLocation, shelterType, profile, shelters) =
     });
     console.log("sheltersOfType : ", sheltersOfType);
     const nearestShelters = getNearestShelters(userLocation, sheltersOfType);
+    console.log("nearestShelters ", nearestShelters);
     let shortestRoute = null;
     
     for (const sheltersOfType of nearestShelters) {
