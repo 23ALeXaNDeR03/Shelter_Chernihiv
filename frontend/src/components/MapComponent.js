@@ -3,11 +3,12 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShelterTypes }) => {
+const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShelterTypes, route }) => {
     const [userLocation, setUserLocation] = useState(null);
     const mapRef = useRef(null);
     const markersRef = useRef({});
     const userMarkerRef = useRef(null);
+    const routeRef = useRef(null); // Reference to the route polyline
 
     useEffect(() => {
         console.log('Selected Shelter Types:', selectedShelterTypes);
@@ -96,6 +97,22 @@ const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShel
         }
     }, [selectedShelter]);
 
+    const updateRoute = useCallback(() => {
+        if (mapRef.current && route) {
+            // Видалити попередній маршрут, якщо він існує
+            if (routeRef.current) {
+                routeRef.current.remove();
+            }
+
+            // Створюємо новий маршрут
+            const latlngs = route.map(point => [point.latitude, point.longitude]);
+            routeRef.current = L.polyline(latlngs, { color: 'blue' }).addTo(mapRef.current);
+
+            // Підгонка карти до меж маршруту
+            mapRef.current.fitBounds(routeRef.current.getBounds());
+        }
+    }, [route]);
+
     useEffect(() => {
         initializeMap();
         return () => {
@@ -117,6 +134,10 @@ const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShel
     useEffect(() => {
         highlightSelectedShelter();
     }, [highlightSelectedShelter]);
+
+    useEffect(() => {
+        updateRoute();
+    }, [updateRoute]);
 
     return <div id="map" style={{ height: "600px", width: "100%" }}></div>;
 };

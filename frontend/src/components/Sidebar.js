@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-const Sidebar = ({ shelters, setTransportMode, calculateRoute, onShelterSelect, selectedShelterTypes,
+const Sidebar = ({ shelters, calculateRoute, onShelterSelect, selectedShelterTypes,
     setSelectedShelterTypes, selectedTransportMode, setSelectedTransportMode }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -18,7 +18,6 @@ const Sidebar = ({ shelters, setTransportMode, calculateRoute, onShelterSelect, 
 
     const handleTransportToggle = (mode) => {
         setSelectedTransportMode(mode);
-        setTransportMode(mode);
     };
 
     const handleSearchIconClick = () => {
