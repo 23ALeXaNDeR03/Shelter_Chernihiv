@@ -3,13 +3,11 @@ const app = express();
 const cors = require('cors');
 const { sequelize } = require('./models');
 const sheltersRouter = require('./routes/shelters');
-const userLocationRouter = require('./routes/userLocation');
 const routeCalculationRouter = require('./routes/routeCalculation');
 
 app.use(cors());
 app.use(express.json());
 app.use('/api/shelters', sheltersRouter);
-app.use('/api/user-location', userLocationRouter);
 app.use('/api/calculate-route', routeCalculationRouter);
 
 const PORT = process.env.PORT || 5000;

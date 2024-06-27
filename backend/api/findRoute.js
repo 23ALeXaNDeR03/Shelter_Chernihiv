@@ -11,8 +11,8 @@ const haversineDistance = (coords1, coords2) => {
     const dLon = toRad(coords2.longitude - coords1.longitude);
 
     const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(coords1.latitude)) * Math.cos(toRad(coords2.latitude)) *
-              Math.sin(dLon / 2) ** 2;
+        Math.cos(toRad(coords1.latitude)) * Math.cos(toRad(coords2.latitude)) *
+        Math.sin(dLon / 2) ** 2;
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
@@ -44,7 +44,7 @@ const getRoute = async (start, end, profile) => {
         const routeData = response.data.features[0];
         const route = routeData.geometry.coordinates.map(coord => [coord[1], coord[0]]);
         const distance = routeData.properties.summary.distance;
-        return { route, distance};
+        return { route, distance };
     } catch (error) {
         console.error('Error fetching route:', error);
         return null;
@@ -57,21 +57,18 @@ const findShortestRoute = async (userLocation, shelterType, profile, shelters) =
     const sheltersOfType = [];
     shelters.forEach(shelters => {
         if (shelterType.includes(shelters.sheltertype)) {
-            sheltersOfType.push({latitude: shelters.latitude, longitude: shelters.longitude});
+            sheltersOfType.push({ latitude: shelters.latitude, longitude: shelters.longitude });
         }
     });
-    console.log("sheltersOfType : ", sheltersOfType);
     const nearestShelters = getNearestShelters(userLocation, sheltersOfType);
-    console.log("nearestShelters ", nearestShelters);
     let shortestRoute = null;
-    
+
     for (const sheltersOfType of nearestShelters) {
         const result = await getRoute(userLocation, { lat: sheltersOfType.latitude, lng: sheltersOfType.longitude }, profile);
         if (result && (!shortestRoute || result.distance < shortestRoute.distance)) {
-            shortestRoute = { ...result};
+            shortestRoute = { ...result };
         }
     }
-    console.log("findRoute new route?: ", shortestRoute);
     return shortestRoute;
 };
 
