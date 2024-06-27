@@ -102,20 +102,20 @@ const Sidebar = ({ shelters, calculateRoute, onShelterSelect, selectedShelterTyp
                 </div>
                 <div className={`transport-toggle ${isSearchFocused ? 'hidden' : ''}`}>
                     <button
-                        className={`toggle-btn ${selectedTransportMode === 'walking' ? 'active' : ''}`}
-                        onClick={() => handleTransportToggle('walking')}
+                        className={`toggle-btn ${selectedTransportMode === 'foot-walking' ? 'active' : ''}`}
+                        onClick={() => handleTransportToggle('foot-walking')}
                     >
                         <img src='../img/walking.png' alt="Walking" />
                     </button>
                     <button
-                        className={`toggle-btn ${selectedTransportMode === 'driving' ? 'active' : ''}`}
-                        onClick={() => handleTransportToggle('driving')}
+                        className={`toggle-btn ${selectedTransportMode === 'driving-car' ? 'active' : ''}`}
+                        onClick={() => handleTransportToggle('driving-car')}
                     >
                         <img src='../img/car.png' alt="Driving" />
                     </button>
                 </div>
                 <button className={`route-btn ${isSearchFocused ? 'hidden' : ''}`} onClick={calculateRoute}>
-                    Проложити маршрут
+                    Прокласти маршрут
                 </button>
             </div>
             <div id="map"></div>

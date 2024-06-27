@@ -1,14 +1,12 @@
-import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
-const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShelterTypes, route }) => {
-    const [userLocation, setUserLocation] = useState(null);
+const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShelterTypes, route, userLocation, setUserLocation }) => {
     const mapRef = useRef(null);
     const markersRef = useRef({});
     const userMarkerRef = useRef(null);
-    const routeRef = useRef(null); // Reference to the route polyline
+    const routeRef = useRef(null);
 
     useEffect(() => {
         console.log('Selected Shelter Types:', selectedShelterTypes);
@@ -18,14 +16,6 @@ const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShel
         'найпростіше': 'simple',
         'протирадіаційне': 'antiradiation',
         'цивільного захисту': 'civildefense'
-    };
-
-    const sendUserLocationToBackend = async (location) => {
-        try {
-            await axios.post('http://localhost:5000/api/user-location', location);
-        } catch (error) {
-            console.error('Failed to send user location to backend:', error);
-        }
     };
 
     const initializeMap = useCallback(() => {
@@ -39,7 +29,6 @@ const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShel
                 const { lat, lng } = e.latlng;
                 const location = { latitude: lat, longitude: lng };
                 setUserLocation(location);
-                sendUserLocationToBackend(location);
             });
         }
     }, []);
@@ -103,12 +92,9 @@ const MapComponent = ({ shelters, selectedShelter, onShelterSelect, selectedShel
             if (routeRef.current) {
                 routeRef.current.remove();
             }
+            routeRef.current = L.polyline(route.newRoute, { color: 'blue' }).addTo(mapRef.current);
 
-            // Створюємо новий маршрут
-            const latlngs = route.map(point => [point.latitude, point.longitude]);
-            routeRef.current = L.polyline(latlngs, { color: 'blue' }).addTo(mapRef.current);
-
-            // Підгонка карти до меж маршруту
+            //Підгонка карти до меж маршруту
             mapRef.current.fitBounds(routeRef.current.getBounds());
         }
     }, [route]);

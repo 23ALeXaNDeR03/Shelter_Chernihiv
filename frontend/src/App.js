@@ -9,8 +9,9 @@ function App() {
   const [selectedShelter, setSelectedShelter] = useState(null);
   const [error, setError] = useState(null);
   const [selectedShelterTypes, setSelectedShelterTypes] = useState([]);
-  const [selectedTransportMode, setSelectedTransportMode] = useState('walking');
-  const [route, setRoute] = useState(null); // New state for route
+  const [selectedTransportMode, setSelectedTransportMode] = useState('foot-walking');
+  const [route, setRoute] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   useEffect(() => {
     const fetchShelters = async () => {
@@ -30,17 +31,14 @@ function App() {
   };
 
   const calculateRoute = async () => {
-    console.log("Calculating route with:", {
-      selectedShelterTypes,
-      selectedTransportMode
-    });
     try {
       const response = await axios.post('http://localhost:5000/api/calculate-route', {
         selectedShelterTypes,
-        selectedTransportMode
+        selectedTransportMode,
+        shelters,
+        userLocation
       });
-
-      console.log("Route calculated: ", response.data);
+      setRoute(response.data);
     } catch (error) {
       console.error("Error calculating route: ", error);
     }
@@ -68,6 +66,8 @@ function App() {
         selectedShelterTypes={selectedShelterTypes}
         onShelterSelect={highlightShelter}
         route={route} // Pass the route to MapComponent
+        userLocation={userLocation}
+        setUserLocation={setUserLocation}
       />
     </div>
   );
